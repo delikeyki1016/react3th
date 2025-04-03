@@ -2,23 +2,24 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 
 const BoxStyle = styled("div")(() => ({
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
     width: "50%",
+    height: 170,
     border: "5px solid black",
     color: "#000",
-    padding: "20px",
-    textAlign: "center",
+    padding: "20px 0",
     borderRadius: "8px",
 }));
 
 const HandStyle = styled("div")(() => ({
-    height: 67,
     "& .MuiSvgIcon-root, & span": {
         fontSize: 50,
     },
 }));
 
 const RockBox = (props) => {
-    // console.log("props:", props);
     return (
         <BoxStyle
             sx={{
@@ -37,7 +38,9 @@ const RockBox = (props) => {
                     ? "win"
                     : props.result === "졌다"
                     ? "loose"
-                    : "same"}
+                    : props.result === "비겼다"
+                    ? "same"
+                    : ""}
             </p>
         </BoxStyle>
     );

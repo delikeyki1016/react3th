@@ -16,7 +16,8 @@ const GameWrap = styled("div")(() => ({
         display: "block",
         position: "absolute",
         top: 123,
-        left: 168,
+        left: "50%",
+        marginLeft: "-30px",
         content: '"VS"',
         color: "#1976d2",
         fontSize: 50,
@@ -62,7 +63,7 @@ const choice = {
 const RockScissorPaper = () => {
     const [myHand, setMyHand] = useState(null);
     const [comHand, setComHand] = useState(null);
-    const [result, setResult] = useState("");
+    const [myResult, setMyResult] = useState("");
     const [comResult, setComResult] = useState("");
     const [totalResult, setTotalResult] = useState("");
 
@@ -78,27 +79,30 @@ const RockScissorPaper = () => {
     };
 
     const game = (item) => {
-        // console.log("item?", item);
         setMyHand(item);
         const comSelect = getRandomHand();
         setComHand(comSelect);
+        setTime(time - 1);
     };
 
     const gameResult = (myHand, comHand) => {
-        if (!myHand || !comHand) return "";
-        if (myHand === "rock") {
-            if (comHand === "rock") return "비겼다";
-            if (comHand === "paper") return "졌다";
-            if (comHand === "scissor") return "이겼다";
-        } else if (myHand === "paper") {
-            if (comHand === "rock") return "이겼다";
-            if (comHand === "paper") return "비겼다";
-            if (comHand === "scissor") return "졌다";
-        } else if (myHand === "scissor") {
-            if (comHand === "rock") return "졌다";
-            if (comHand === "paper") return "이겼다";
-            if (comHand === "scissor") return "비겼다";
+        let myResult = "";
+        let comResult = "";
+        if (myHand === comHand) {
+            myResult = "비겼다";
+            comResult = "비겼다";
+        } else if (
+            (myHand === "rock" && comHand === "scissor") ||
+            (myHand === "paper" && comHand === "rock") ||
+            (myHand === "scissor" && comHand === "paper")
+        ) {
+            myResult = "이겼다";
+            comResult = "졌다";
+        } else {
+            myResult = "졌다";
+            comResult = "이겼다";
         }
+        return { myResult, comResult };
     };
 
     const resetGame = () => {
@@ -107,26 +111,22 @@ const RockScissorPaper = () => {
         setResultPerTime([]);
         setMyHand(null);
         setComHand(null);
-        setResult("result");
-        setComResult("result");
+        setMyResult("");
+        setComResult("");
+        setTotalResult("");
     };
 
     useEffect(() => {
         if (myHand === null || comHand === null) return;
         const resultText = gameResult(myHand, comHand);
-        setResult(resultText);
-        setResultPerTime((prev) => [...prev, `${5 - time} ${resultText}`]); // 결과가 같더라도 유일한 값을 갖도록 숫자 붙임
+        // console.log(resultText.myResult);
+        setMyResult(resultText.myResult);
+        setComResult(resultText.comResult);
+        setResultPerTime((prev) => [
+            ...prev,
+            `${5 - time} ${resultText.myResult}`,
+        ]); // 결과가 같더라도 유일한 값을 갖도록 숫자 붙임
     }, [myHand, comHand, time]);
-
-    useEffect(() => {
-        if (result === "이겼다") {
-            return setComResult("졌다");
-        } else if (result === "졌다") {
-            return setComResult("이겼다");
-        } else if (result === "비겼다") {
-            return setComResult("비겼다");
-        }
-    }, [result]);
 
     useEffect(() => {
         if (time === 0 && resultPerTime.length > 0) {
@@ -140,7 +140,6 @@ const RockScissorPaper = () => {
                 .map((r) => r.split(" ")[1])
                 .filter((r) => r === "졌다").length;
 
-            // console.log(winCount, loseCount);
             setTotalResult(
                 winCount > loseCount
                     ? "이겼다"
@@ -160,7 +159,7 @@ const RockScissorPaper = () => {
                 <RockBox
                     name="you"
                     item={myHand ? choice[myHand] : { name: "", icon: <div /> }}
-                    result={result}
+                    result={myResult}
                 />
                 <RockBox
                     name="computer"
@@ -176,7 +175,6 @@ const RockScissorPaper = () => {
                     startIcon={<span>✌️</span>}
                     onClick={() => {
                         game("scissor");
-                        setTime(time - 1);
                     }}
                     disabled={buttonDisabled}
                 >
@@ -187,7 +185,6 @@ const RockScissorPaper = () => {
                     startIcon={<span>✊</span>}
                     onClick={() => {
                         game("rock");
-                        setTime(time - 1);
                     }} //onClick사용시에 ()=> 의 콜백함수로 넣어줘야 리랜더링될 때 실행되지 않음
                     disabled={buttonDisabled}
                 >
@@ -199,7 +196,6 @@ const RockScissorPaper = () => {
                     startIcon={<span>✋</span>}
                     onClick={() => {
                         game("paper");
-                        setTime(time - 1);
                     }}
                     disabled={buttonDisabled}
                 >
